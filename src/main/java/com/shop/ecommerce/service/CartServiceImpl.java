@@ -42,12 +42,34 @@ public class CartServiceImpl implements CartService {
             cartItem.setCart(cart);
             cartItem.setQuantity(req.getQuantity());
             cartItem.setUserId(userId);
+
+            int price = (int) (req.getQuantity() * product.getDiscountedPrice());
+            cartItem.setPrice(price);
+            cartItem.setSize(req.getSize());
+
+            CartItem createdCartItem = cartItemService.createCartItem(cartItem);
+            cart.getCartitems().add(createdCartItem);
         }
-        return "";
+        return "Item Add To Cart";
     }
 
     @Override
     public Cart findUserCart(Long userId) {
-        return null;
+        Cart cart = cartRepository.findByUserId(userId);
+        int totalPrice = 0;
+        int totalDiscountedPrice = 0;
+        int totalItem = 0;
+
+        for (CartItem cartItem : cart.getCartitems()) {
+            totalPrice += cartItem.getPrice();
+            totalDiscountedPrice += totalDiscountedPrice + cartItem.getDiscountedPrice();
+            totalItem += cartItem.getQuantity();
+        }
+
+        cart.setTotalDiscountedPrice(totalDiscountedPrice);
+        cart.setTotalItem(totalItem);
+        cart.setTotalPrice(totalPrice);
+        cart.setDiscount(totalPrice - totalDiscountedPrice);
+        return cartRepository.save(cart);
     }
 }
