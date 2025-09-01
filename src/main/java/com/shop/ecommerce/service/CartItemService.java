@@ -5,7 +5,9 @@ import com.shop.ecommerce.exception.UserException;
 import com.shop.ecommerce.model.Cart;
 import com.shop.ecommerce.model.CartItem;
 import com.shop.ecommerce.model.Product;
+import org.springframework.stereotype.Service;
 
+@Service
 public interface CartItemService {
     CartItem createCartItem(CartItem cartItem);
 

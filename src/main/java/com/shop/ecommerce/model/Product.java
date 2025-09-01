@@ -14,79 +14,57 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
+
     @Column(name = "title")
     private String title;
+
     @Column(name = "description")
     private String description;
+
     @Column(name = "price")
     private Integer price;
+
     @Column(name = "brand")
     private String brand;
+
     @Column(name = "color")
     private String color;
+
     @ElementCollection
     @Column(name = "sizes")
     private Set<Size> sizes = new HashSet<>();
+
     @Column(name = "image_url")
     private String imageUrl;
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Rating> ratings = new ArrayList<>();
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
+
     @Column(name = "num_ratings")
-    private int numRatings;
+    private Integer numRatings;  // Changed to Integer
+
     @ManyToOne()
     @JoinColumn(name = "category_id")
     private Category category;
+
     private LocalDateTime createdAt;
+
     @Column(name = "discount_percent")
     private Integer discountPercent;
+
     @Column(name = "discounted_price")
     private Double discountedPrice;
+
     @Column(name = "quantity")
-    private int quantity;
-
-    public Product(long id, String title, String description, Integer price, String brand, String color, Set<Size> sizes, String imageUrl, List<Rating> ratings, List<Review> reviews, int numRatings, Category category, LocalDateTime createdAt, Integer discountPercent, Double discountedPrice, int quantity) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.price = price;
-        this.brand = brand;
-        this.color = color;
-        this.sizes = sizes;
-        this.imageUrl = imageUrl;
-        this.ratings = ratings;
-        this.reviews = reviews;
-        this.numRatings = numRatings;
-        this.category = category;
-        this.createdAt = createdAt;
-        this.discountPercent = discountPercent;
-        this.discountedPrice = discountedPrice;
-        this.quantity = quantity;
-    }
-
-    public Product(long id, String title, String description, Integer price, String brand, String color, Set<Size> sizes, String imageUrl, List<Rating> ratings, List<Review> reviews, int numRatings, Category category, LocalDateTime createdAt, Integer discountPercent, Double discountedPrice) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.price = price;
-        this.brand = brand;
-        this.color = color;
-        this.sizes = sizes;
-        this.imageUrl = imageUrl;
-        this.ratings = ratings;
-        this.reviews = reviews;
-        this.numRatings = numRatings;
-        this.category = category;
-        this.createdAt = createdAt;
-        this.discountPercent = discountPercent;
-        this.discountedPrice = discountedPrice;
-    }
+    private Integer quantity;  // Changed to Integer
 
     public Product() {
     }
 
-    public Product(long id, String title, String description, Integer price, String brand, String color, Set<Size> sizes, String imageUrl, List<Rating> ratings, List<Review> reviews, int numRatings, Category category, LocalDateTime createdAt) {
+    public Product(long id, String title, String description, Integer price, String brand, String color, Set<Size> sizes, String imageUrl, List<Rating> ratings, List<Review> reviews, Integer numRatings, Category category, LocalDateTime createdAt, Integer discountPercent, Double discountedPrice, Integer quantity) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -100,31 +78,11 @@ public class Product {
         this.numRatings = numRatings;
         this.category = category;
         this.createdAt = createdAt;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
+        this.discountPercent = discountPercent;
+        this.discountedPrice = discountedPrice;
         this.quantity = quantity;
     }
-
-    public Integer getDiscountPercent() {
-        return discountPercent;
-    }
-
-    public void setDiscountPercent(Integer discountPercent) {
-        this.discountPercent = discountPercent;
-    }
-
-    public Double getDiscountedPrice() {
-        return discountedPrice;
-    }
-
-    public void setDiscountedPrice(Double discountedPrice) {
-        this.discountedPrice = discountedPrice;
-    }
+// Getters and Setters
 
     public long getId() {
         return id;
@@ -155,10 +113,6 @@ public class Product {
     }
 
     public void setPrice(Integer price) {
-        this.price = price;
-    }
-
-    public void setPrice(int price) {
         this.price = price;
     }
 
@@ -210,11 +164,11 @@ public class Product {
         this.reviews = reviews;
     }
 
-    public int getNumRatings() {
+    public Integer getNumRatings() {
         return numRatings;
     }
 
-    public void setNumRatings(int numRatings) {
+    public void setNumRatings(Integer numRatings) {
         this.numRatings = numRatings;
     }
 
@@ -232,5 +186,29 @@ public class Product {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Integer getDiscountPercent() {
+        return discountPercent;
+    }
+
+    public void setDiscountPercent(Integer discountPercent) {
+        this.discountPercent = discountPercent;
+    }
+
+    public Double getDiscountedPrice() {
+        return discountedPrice;
+    }
+
+    public void setDiscountedPrice(Double discountedPrice) {
+        this.discountedPrice = discountedPrice;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 }

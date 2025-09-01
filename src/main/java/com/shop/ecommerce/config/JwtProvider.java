@@ -24,11 +24,12 @@ public class JwtProvider {
     }
 
     public String getEmailFromToken(String jwt) {
-        jwt = jwt.substring(7);
+        // Do NOT remove prefix here - expect raw token only
         SecretKey key = Keys.hmacShaKeyFor(JwtConstant.SECRET_KEY.getBytes());
         Claims claims = Jwts.parser().setSigningKey(key).build().parseClaimsJws(jwt).getBody();
         String email = String.valueOf(claims.get("email"));
         return email;
     }
+
 
 }
