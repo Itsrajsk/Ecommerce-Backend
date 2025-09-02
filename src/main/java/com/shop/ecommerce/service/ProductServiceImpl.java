@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,38 +33,36 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product createProduct(CreateProductRequest req) {
+        // 1. Handle top level category
         Category topLevel = categoryRepository.findByName(req.getTopLevelCategory());
-
         if (topLevel == null) {
-            Category topLevelCategory = new Category();
-            topLevelCategory.setName(req.getTopLevelCategory());
-            topLevelCategory.setLevel(1);
-
-            topLevel = categoryRepository.save(topLevelCategory);
+            topLevel = new Category();
+            topLevel.setName(req.getTopLevelCategory());
+            topLevel.setLevel(1);
+            topLevel = categoryRepository.save(topLevel);
         }
 
+        // 2. Handle second level category
         Category secondLevel = categoryRepository.findByName(req.getSecondLevelCategory());
-
         if (secondLevel == null) {
-            Category secondLevelCategory = new Category();
-            secondLevelCategory.setName(req.getSecondLevelCategory());
-            secondLevelCategory.setParentCategory(topLevel);
-            secondLevelCategory.setLevel(2);
-
-            secondLevel = categoryRepository.save(secondLevelCategory);
+            secondLevel = new Category();
+            secondLevel.setName(req.getSecondLevelCategory());
+            secondLevel.setParentCategory(topLevel);
+            secondLevel.setLevel(2);
+            secondLevel = categoryRepository.save(secondLevel);
         }
 
+        // 3. Handle third level category
         Category thirdLevel = categoryRepository.findByName(req.getThirdLevelCategory());
-
         if (thirdLevel == null) {
-            Category thirdLevelCategory = new Category();
-            thirdLevelCategory.setName(req.getThirdLevelCategory());
-            thirdLevelCategory.setParentCategory(secondLevel);
-            thirdLevelCategory.setLevel(3);
-
-            thirdLevel = categoryRepository.save(thirdLevelCategory);
+            thirdLevel = new Category();
+            thirdLevel.setName(req.getThirdLevelCategory());
+            thirdLevel.setParentCategory(secondLevel);
+            thirdLevel.setLevel(3);
+            thirdLevel = categoryRepository.save(thirdLevel);
         }
 
+        // 4. Now create the product with full category entity
         Product product = new Product();
         product.setTitle(req.getTitle());
         product.setColor(req.getColor());
@@ -78,8 +77,7 @@ public class ProductServiceImpl implements ProductService {
         product.setCategory(thirdLevel);
         product.setCreatedAt(LocalDateTime.now());
 
-        Product savedProduct = productRepository.save(product);
-        return savedProduct;
+        return productRepository.save(product);
     }
 
     @Override
@@ -117,31 +115,84 @@ public class ProductServiceImpl implements ProductService {
     public Page<Product> getAllProducts(String category, List<String> colors, List<String> sizes, Integer minPrice, Integer maxPrice, Integer minDiscount, String sort, String stock, Integer pageNumber, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
-        List<Product> products = productRepository.filterProducts(category, minPrice, maxPrice, minDiscount, sort);
-        if (!colors.isEmpty()) {
-            products = products.stream().filter(p -> colors.stream().anyMatch(c -> c.equalsIgnoreCase(p.getColor()))).toList();
+        // Initialize lists if null
+        if (colors == null) {
+            colors = new ArrayList<>();
+        }
+        if (sizes == null) {
+            sizes = new ArrayList<>();
         }
 
+        // Start with filtered products by category and price
+        List<Product> products = productRepository.filterProducts(category, minPrice, maxPrice, minDiscount, sort);
+
+        // Filter by colors if present
+        List<Product> filteredProducts = new ArrayList<>();
+        if (!colors.isEmpty()) {
+            for (Product p : products) {
+                for (String color : colors) {
+                    if (color.equalsIgnoreCase(p.getColor())) {
+                        filteredProducts.add(p);
+                        break;
+                    }
+                }
+            }
+        } else {
+            filteredProducts = new ArrayList<>(products);
+        }
+
+        // Filter by sizes if present
+        List<Product> sizeFiltered = new ArrayList<>();
+        if (!sizes.isEmpty()) {
+            for (Product p : filteredProducts) {
+                for (String size : sizes) {
+                    if (p.getSizes().contains(size)) {
+                        sizeFiltered.add(p);
+                        break;
+                    }
+                }
+            }
+        } else {
+            sizeFiltered = filteredProducts;
+        }
+
+        // Filter by stock status
+        List<Product> stockFiltered = new ArrayList<>();
         if (stock != null) {
             if (stock.equals("in_stock")) {
-                products = products.stream().filter(p -> p.getQuantity() > 0).toList();
+                for (Product p : sizeFiltered) {
+                    if (p.getQuantity() > 0) {
+                        stockFiltered.add(p);
+                    }
+                }
             } else if (stock.equals("out_of_stock")) {
-                products = products.stream().filter(p -> p.getQuantity() < 1).toList();
+                for (Product p : sizeFiltered) {
+                    if (p.getQuantity() < 1) {
+                        stockFiltered.add(p);
+                    }
+                }
+            } else {
+                stockFiltered = sizeFiltered;
             }
+        } else {
+            stockFiltered = sizeFiltered;
         }
 
         int startIndex = Math.toIntExact(pageable.getOffset());
-        int endIndex = Math.min(startIndex + pageable.getPageSize(), products.size());
+        int endIndex = Math.min(startIndex + pageable.getPageSize(), stockFiltered.size());
 
-        List<Product> pageContent = products.subList(startIndex, endIndex);
-        Page<Product> filteredProducts = new PageImpl<>(pageContent, pageable, products.size());
+        List<Product> pageContent = new ArrayList<>();
+        if (startIndex <= endIndex) {
+            pageContent = stockFiltered.subList(startIndex, endIndex);
+        }
 
-        return filteredProducts;
+        Page<Product> filteredPage = new PageImpl<>(pageContent, pageable, stockFiltered.size());
+
+        return filteredPage;
     }
 
     @Override
     public List<Product> findAllProducts() {
         return productRepository.findAll();
     }
-
 }
