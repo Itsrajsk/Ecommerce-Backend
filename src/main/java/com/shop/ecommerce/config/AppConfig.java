@@ -25,6 +25,7 @@ public class AppConfig {
                     CorsConfiguration cfg = new CorsConfiguration();
                     cfg.setAllowedOrigins(Arrays.asList(
                             "http://localhost:3000",
+                            "http://localhost:5173",
                             "http://localhost:4200",
                             "https://ecommerce-taupe-eta-99.vercel.app",
                             "https://ecommerce-backend-production-ff66.up.railway.app"

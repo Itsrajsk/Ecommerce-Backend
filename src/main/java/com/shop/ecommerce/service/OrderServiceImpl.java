@@ -45,6 +45,23 @@ public class OrderServiceImpl implements OrderService {
         Cart cart = cartService.findUserCart(user.getId());
         List<OrderItem> orderItems = new ArrayList<>();
 
+        Order order = new Order();
+        order.setUser(user);
+        order.setShippingAddress(savedAddress);
+        order.setOrderDate(LocalDateTime.now());
+        order.setCreatedAt(LocalDateTime.now());
+        order.setOrderStatus("PENDING");
+
+        // Initialize payment details safely
+        PaymentDetails paymentDetails = new PaymentDetails();
+        paymentDetails.setStatus("PENDING");
+        order.setPaymentDetails(paymentDetails);
+
+        order.setTotalPrice(cart.getTotalPrice());
+        order.setTotalItem(cart.getTotalItem());
+        order.setDiscount(cart.getDiscount());
+        order.setTotalDiscountedPrice(cart.getTotalDiscountedPrice());
+
         for (CartItem cartItem : cart.getCartitems()) {
             OrderItem orderItem = new OrderItem();
             orderItem.setProduct(cartItem.getProduct());
@@ -53,34 +70,22 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setPrice(cartItem.getPrice());
             orderItem.setDiscountedPrice(cartItem.getDiscountedPrice());
             orderItem.setUserId(cartItem.getUserId());
+            orderItem.setOrder(order); // link before saving
             orderItems.add(orderItem);
         }
 
-        // Create and configure order entity
-        Order order = new Order();
-        order.setUser(user);
         order.setOrderItems(orderItems);
-        order.setShippingAddress(savedAddress);
-        order.setOrderDate(LocalDateTime.now());
-        order.setCreatedAt(LocalDateTime.now());
-        order.setOrderStatus("PENDING");
-        order.getPaymentDetails().setStatus("PENDING");
-        order.setTotalPrice(cart.getTotalPrice());
-        order.setTotalItem(cart.getTotalItem());
-        order.setDiscount(cart.getDiscount());
-        order.setTotalDiscountedPrice(cart.getTotalDiscountedPrice());
 
-        // Persist order to generate ID
+        // Save order and items
         Order savedOrder = orderRepository.save(order);
-
-        // Link each order item to saved order and save
-        for (OrderItem item : orderItems) {
-            item.setOrder(savedOrder);
-        }
         orderItemRepository.saveAll(orderItems);
+
+        // Clear cart after placing order
+//        cartService.clearCart(user.getId());
 
         return savedOrder;
     }
+
 
     @Override
     public Order placedOrder(Long orderId) throws OrderException {

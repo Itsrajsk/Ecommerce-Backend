@@ -30,6 +30,21 @@ public class OrderItem {
 
     private LocalDateTime deliveryDate;
 
+    private String color;
+
+    public OrderItem(Long id, Order order, Product product, String size, int quantity, Integer price, Integer discountedPrice, Long userId, LocalDateTime deliveryDate, String color) {
+        this.id = id;
+        this.order = order;
+        this.product = product;
+        this.size = size;
+        this.quantity = quantity;
+        this.price = price;
+        this.discountedPrice = discountedPrice;
+        this.userId = userId;
+        this.deliveryDate = deliveryDate;
+        this.color = color;
+    }
+
     public OrderItem() {
 
     }
@@ -44,6 +59,14 @@ public class OrderItem {
         this.discountedPrice = discountedPrice;
         this.userId = userId;
         this.deliveryDate = deliveryDate;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 
     public Long getId() {

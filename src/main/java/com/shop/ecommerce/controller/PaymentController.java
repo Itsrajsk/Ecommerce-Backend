@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api")
 public class PaymentController {
     @Value("${razorpay.api.key}")
     String apiKey;
@@ -34,7 +35,7 @@ public class PaymentController {
     @Autowired
     private OrderRepository orderRepository;
 
-    @PostMapping
+    @PostMapping("/payments/{orderId}")
     public ResponseEntity<PaymentLinkResponse> createPaymentLink(@PathVariable Long orderId,
                                                                  @RequestHeader("Authorization") String jwt) throws OrderException, RazorpayException {
         Order order = orderService.findOrderById(orderId);
