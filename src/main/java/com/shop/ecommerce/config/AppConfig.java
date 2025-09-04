@@ -23,7 +23,12 @@ public class AppConfig {
                 .and()
                 .cors().configurationSource(request -> {
                     CorsConfiguration cfg = new CorsConfiguration();
-                    cfg.addAllowedOriginPattern("*");
+                    cfg.setAllowedOrigins(Arrays.asList(
+                            "http://localhost:3000",
+                            "http://localhost:4200",
+                            "https://ecommerce-taupe-eta-99.vercel.app",
+                            "https://ecommerce-backend-production-ff66.up.railway.app"
+                    ));
                     cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     cfg.setAllowCredentials(true);
                     cfg.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));
@@ -34,13 +39,15 @@ public class AppConfig {
                 .and()
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/**").permitAll()   // ✅ allow signin/signup
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
                 )
+                // only validate JWT for protected endpoints
                 .addFilterBefore(new JwtValidator(), BasicAuthenticationFilter.class);
+
         return http.build();
     }
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {
