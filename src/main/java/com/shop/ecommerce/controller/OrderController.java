@@ -57,4 +57,17 @@ public class OrderController {
         }
         return authHeader.substring(7); // Remove "Bearer " prefix
     }
+
+    @PutMapping("/{orderId}/shippingAddress")
+    public ResponseEntity<Order> updateShippingAddress(@PathVariable Long orderId,
+                                                       @RequestBody Address newAddress,
+                                                       @RequestHeader("Authorization") String authHeader) throws OrderException, UserException {
+        // Optional: Add logic to verify user ownership of the order for security
+        String jwt = extractJwtFromHeader(authHeader);
+        User user = userService.findUserProfileByJwt(jwt);
+
+        Order updatedOrder = orderService.updateShippingAddress(orderId, newAddress);
+
+        return new ResponseEntity<>(updatedOrder, HttpStatus.OK);
+    }
 }

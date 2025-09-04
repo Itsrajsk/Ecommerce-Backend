@@ -139,4 +139,31 @@ public class OrderServiceImpl implements OrderService {
         Order order = findOrderById(orderId);
         orderRepository.delete(order);
     }
+
+    // Add this method to your implementation class
+    @Override
+    public Order updateShippingAddress(Long orderId, Address newAddress) throws OrderException {
+        Order order = findOrderById(orderId);
+
+        if (order.getShippingAddress() != null && order.getShippingAddress().getId() > 0) {
+            // Update the existing address
+            Address existingAddress = order.getShippingAddress();
+            existingAddress.setFirstName(newAddress.getFirstName());
+            existingAddress.setLastName(newAddress.getLastName());
+            existingAddress.setStreetAddress(newAddress.getStreetAddress());
+            existingAddress.setCity(newAddress.getCity());
+            existingAddress.setState(newAddress.getState());
+            existingAddress.setZipCode(newAddress.getZipCode());
+            existingAddress.setMobile(newAddress.getMobile());
+
+            addressRepository.save(existingAddress);
+            return orderRepository.save(order);
+        } else {
+            // If no address exists, create and link a new one
+            newAddress.setUser(order.getUser());
+            Address savedNewAddress = addressRepository.save(newAddress);
+            order.setShippingAddress(savedNewAddress);
+            return orderRepository.save(order);
+        }
+    }
 }
