@@ -23,7 +23,12 @@ public class AppConfig {
                 .and()
                 .cors().configurationSource(request -> {
                     CorsConfiguration cfg = new CorsConfiguration();
-                    cfg.setAllowedOrigins(List.of("http://localhost:5173"));
+                    cfg.setAllowedOrigins(List.of(
+                            "http://localhost:5173", // local dev
+                            "https://ecommerce-frontend.vercel.app", // if deployed on Vercel
+                            "https://ecommerce-frontend-production.up.railway.app" // if deployed on Railway
+                    ));
+
                     cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     cfg.setAllowCredentials(true);
                     cfg.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));
