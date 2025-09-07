@@ -33,52 +33,75 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product createProduct(CreateProductRequest req) {
-        // 1. Handle top level category
-        Category topLevel = categoryRepository.findByName(req.getTopLevelCategory());
-        if (topLevel == null) {
-            topLevel = new Category();
-            topLevel.setName(req.getTopLevelCategory());
-            topLevel.setLevel(1);
-            topLevel = categoryRepository.save(topLevel);
+        Category topLevel;
+        Category secondLevel;
+        Category thirdLevel = null;
+
+        // Handle Top Level Category
+        if (req.getTopLevelCategory() != null && !req.getTopLevelCategory().isBlank()) {
+            topLevel = categoryRepository.findByNameAndLevel(req.getTopLevelCategory(), 1)
+                    .orElseGet(() -> {
+                        Category newCat = new Category();
+                        newCat.setName(req.getTopLevelCategory());
+                        newCat.setLevel(1);
+                        return categoryRepository.save(newCat);
+                    });
+        } else {
+            topLevel = null;
         }
 
-        // 2. Handle second level category
-        Category secondLevel = categoryRepository.findByName(req.getSecondLevelCategory());
-        if (secondLevel == null) {
-            secondLevel = new Category();
-            secondLevel.setName(req.getSecondLevelCategory());
-            secondLevel.setParentCategory(topLevel);
-            secondLevel.setLevel(2);
-            secondLevel = categoryRepository.save(secondLevel);
+        // Handle Second Level Category
+        if (req.getSecondLevelCategory() != null && !req.getSecondLevelCategory().isBlank()) {
+            secondLevel = categoryRepository.findByNameAndParentCategory(req.getSecondLevelCategory(), topLevel)
+                    .orElseGet(() -> {
+                        Category newCat = new Category();
+                        newCat.setName(req.getSecondLevelCategory());
+                        newCat.setLevel(2);
+                        newCat.setParentCategory(topLevel);
+                        return categoryRepository.save(newCat);
+                    });
+        } else {
+            secondLevel = null;
         }
 
-        // 3. Handle third level category
-        Category thirdLevel = categoryRepository.findByName(req.getThirdLevelCategory());
-        if (thirdLevel == null) {
-            thirdLevel = new Category();
-            thirdLevel.setName(req.getThirdLevelCategory());
-            thirdLevel.setParentCategory(secondLevel);
-            thirdLevel.setLevel(3);
-            thirdLevel = categoryRepository.save(thirdLevel);
+        // Handle Third Level Category
+        if (req.getThirdLevelCategory() != null && !req.getThirdLevelCategory().isBlank()) {
+            thirdLevel = categoryRepository.findByNameAndParentCategory(req.getThirdLevelCategory(), secondLevel)
+                    .orElseGet(() -> {
+                        Category newCat = new Category();
+                        newCat.setName(req.getThirdLevelCategory());
+                        newCat.setLevel(3);
+                        newCat.setParentCategory(secondLevel);
+                        return categoryRepository.save(newCat);
+                    });
         }
 
-        // 4. Now create the product with full category entity
+        // Create Product
         Product product = new Product();
         product.setTitle(req.getTitle());
         product.setColor(req.getColor());
         product.setDescription(req.getDescription());
         product.setDiscountedPrice((double) req.getDiscountedPrice());
-        product.setDiscountPercent(req.getDiscountPersent());
+        product.setDiscountPercent(req.getDiscountPercent());
         product.setImageUrl(req.getImageUrl());
         product.setBrand(req.getBrand());
         product.setPrice(req.getPrice());
         product.setSizes(req.getSize());
         product.setQuantity(req.getQuantity());
-        product.setCategory(thirdLevel);
-        product.setCreatedAt(LocalDateTime.now());
 
+        // Set the deepest available category
+        if (thirdLevel != null) {
+            product.setCategory(thirdLevel);
+        } else if (secondLevel != null) {
+            product.setCategory(secondLevel);
+        } else if (topLevel != null) {
+            product.setCategory(topLevel);
+        }
+
+        product.setCreatedAt(LocalDateTime.now());
         return productRepository.save(product);
     }
+
 
     @Override
     public String deleteProduct(Long productId) throws ProductException {
