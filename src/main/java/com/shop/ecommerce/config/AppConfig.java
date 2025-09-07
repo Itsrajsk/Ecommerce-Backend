@@ -28,7 +28,7 @@ public class AppConfig {
                             "http://localhost:5173",
                             "http://localhost:4200",
                             "https://ecommerce-taupe-eta-99.vercel.app",
-                            "https://ecommerce-gk1scsuaz-raj-kashids-projects.vercel.app/",
+                            "https://ecommerce-gk1scsuaz-raj-kashids-projects.vercel.app",
                             "https://ecommerce-backend-production-ff66.up.railway.app"
                     ));
                     cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));

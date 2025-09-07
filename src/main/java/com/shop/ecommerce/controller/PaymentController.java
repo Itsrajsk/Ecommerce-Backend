@@ -35,6 +35,9 @@ public class PaymentController {
     @Autowired
     private OrderRepository orderRepository;
 
+    @Value("${frontend.base.url}")
+    private String frontendBaseUrl;
+
     @PostMapping("/payments/{orderId}")
     public ResponseEntity<PaymentLinkResponse> createPaymentLink(@PathVariable Long orderId,
                                                                  @RequestHeader("Authorization") String jwt) throws OrderException, RazorpayException {
@@ -55,7 +58,7 @@ public class PaymentController {
             notify.put("email", true);
             paymentLinkRequest.put("notify", notify);
 
-            paymentLinkRequest.put("callback_url", "http://localhost:5173/payment/" + orderId);
+            paymentLinkRequest.put("callback_url", frontendBaseUrl + "/payment/" + orderId);
             paymentLinkRequest.put("callback_method", "get");
 
             PaymentLink payment = razorpayClient.paymentLink.create(paymentLinkRequest);
